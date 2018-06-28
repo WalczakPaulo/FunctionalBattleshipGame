@@ -1,7 +1,7 @@
 package Game
 import Game.GameModel.{Bot, Human, Player}
 import scala.io.StdIn.readLine
-
+import Game.ResponseMessage.miss
 object BattleshipHelper{
 
     def initGame(): Unit = {
@@ -20,13 +20,14 @@ object BattleshipHelper{
 
       def playRound(attacker: Player, defender: Player):Unit = {
         println(s"It's ${attacker.name}'s turn!")
+        attacker.grid.toString
         val currentAttack = attacker.getAttack
         val (currentAttacker, currentDefender, status) = attacker.attack(currentAttack, defender)
         println("That's a .... " + status)
         println(currentAttacker.grid.toString)
         currentAttacker.grid.hitAndSinkCounter match {
           case cnt if cnt > 0 && (cnt == currentDefender.ships.map(_.length).sum) => println(s"${attacker.name} is a winner!")
-          case _ if (status != "miss") => playRound(currentAttacker,currentDefender)
+          case _ if (status != miss) => playRound(currentAttacker,currentDefender)
           case _ => playRound(currentDefender,currentAttacker)
         }
       }

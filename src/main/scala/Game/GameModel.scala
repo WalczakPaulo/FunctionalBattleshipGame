@@ -192,19 +192,16 @@ object GameModel {
       }
 
       Thread.sleep(1000) // simulate thinking
-      grid.hitCounter() match {
-        case c if c > 0 => {
-          val hitPositions = grid.hitPositions
-          if(hitPositions.size == 1) chooseAction(hitPositions.head)
+      grid.hitPositions match {
+        case hPositions if hPositions.size == 1 => chooseAction(hPositions.head)
+        case hPositions if hPositions.size > 1 => {
+          if(findDirection(hPositions).get == Vertical) {
+            if(validateAttackPosition(Position(hPositions.map(_.x).min - 1, hPositions.head.y))) Position(hPositions.map(_.x).min - 1, hPositions.head.y)
+            else Position(hPositions.map(_.x).max + 1, hPositions.head.y)
+          }
           else {
-            if(findDirection(hitPositions).get == Vertical) {
-              if(validateAttackPosition(Position(hitPositions.map(_.x).min - 1, hitPositions.head.y))) Position(hitPositions.map(_.x).min - 1, hitPositions.head.y)
-              else Position(hitPositions.map(_.x).max + 1, hitPositions.head.y)
-            }
-            else {
-              if(validateAttackPosition(Position(hitPositions.head.x, hitPositions.map(_.y).min - 1))) Position(hitPositions.head.x, hitPositions.map(_.y).min - 1)
-              else Position(hitPositions.head.x, hitPositions.map(_.y).max + 1)
-            }
+            if(validateAttackPosition(Position(hPositions.head.x, hPositions.map(_.y).min - 1))) Position(hPositions.head.x, hPositions.map(_.y).min - 1)
+            else Position(hPositions.head.x, hPositions.map(_.y).max + 1)
           }
         }
         case _ => Position(Random.nextInt(Constants.gridWidth), Random.nextInt(Constants.gridHeight))
@@ -229,6 +226,7 @@ object GameModel {
             placeShip(user, shipsToPlace, lengths, grid)
           case Right((user, _)) =>
             val newGrid = grid.addShip(createPositionsFromShip(ship))
+            if(shipsToPlace == 1) println(newGrid.toString) // show how ai placed boats
             placeShip(user, shipsToPlace - 1, lengths.tail, newGrid)
 
         }
@@ -239,7 +237,6 @@ object GameModel {
       }
 
       if(shipsToPlace == 0) {
-        println(player.grid.toString)
         player
       }
       else createShip(lengths.head)
