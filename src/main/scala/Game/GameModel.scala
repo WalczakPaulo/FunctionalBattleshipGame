@@ -98,7 +98,7 @@ object GameModel {
     def createPlayer(name: String, grid: Grid = Gridson.empty, ships: Seq[Ship] = Seq.empty[Ship]) = Human(name,grid,ships)
 
     def shipFromUserInput(): Try[Ship] = {
-      println("place ship: x y length vertical[true/false]")
+      println("Place your ship: X Y LENGTH HORIZONTAL[true/false]")
       val line = readLine
       val t = line.split(" ")
       Try(
