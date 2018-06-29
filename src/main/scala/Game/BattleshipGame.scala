@@ -20,7 +20,6 @@ object BattleshipGameHelper{
 
       def playRound(attacker: Player, defender: Player):Unit = {
         println(s"It's ${attacker.name}'s turn!")
-        attacker.grid.toString
         val currAttack = attacker.getAttack
         val (currAttacker, currDefender, responseMessage) = attacker.attack(currAttack, defender)
         println("That's a .... " + responseMessage)
