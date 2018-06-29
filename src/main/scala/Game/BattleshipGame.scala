@@ -1,8 +1,8 @@
 package Game
 import Game.GameModel.{Bot, Human, Player}
 import scala.io.StdIn.readLine
-import Game.ResponseMessage.miss
-object BattleshipHelper{
+import Game.ResponseMessage.missedAttack
+object BattleshipGameHelper{
 
     def initGame(): Unit = {
       println("............................BattleshipGame.............................\n")
@@ -21,19 +21,19 @@ object BattleshipHelper{
       def playRound(attacker: Player, defender: Player):Unit = {
         println(s"It's ${attacker.name}'s turn!")
         attacker.grid.toString
-        val currentAttack = attacker.getAttack
-        val (currentAttacker, currentDefender, status) = attacker.attack(currentAttack, defender)
-        println("That's a .... " + status)
-        println(currentAttacker.grid.toString)
-        currentAttacker.grid.hitAndSinkCounter match {
-          case cnt if cnt > 0 && (cnt == currentDefender.ships.map(_.length).sum) => println(s"${attacker.name} is a winner!")
-          case _ if (status != miss) => playRound(currentAttacker,currentDefender)
-          case _ => playRound(currentDefender,currentAttacker)
+        val currAttack = attacker.getAttack
+        val (currAttacker, currDefender, responseMessage) = attacker.attack(currAttack, defender)
+        println("That's a .... " + responseMessage)
+        println(currAttacker.grid.toString)
+        currAttacker.grid.hitAndSinkCounter match {
+          case cnt if cnt > 0 && (cnt == currDefender.ships.map(_.length).sum) => println(s"${attacker.name} is a winner!")
+          case _ if (responseMessage != missedAttack) => playRound(currAttacker,currDefender)
+          case _ => playRound(currDefender,currAttacker)
         }
       }
 
-      val human = Human(humanName).placeShips()
-      val bot = Bot(botName).placeShips()
+      val human = Human(humanName).addShips()
+      val bot = Bot(botName).addShips()
       println("Lets fight!")
       playRound(human, bot)
     }
@@ -42,7 +42,7 @@ object BattleshipHelper{
 
 object BattleshipGame {
 
-  import BattleshipHelper._
+  import BattleshipGameHelper._
 
   def main(String: Array[String]) = {
     initGame

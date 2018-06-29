@@ -85,8 +85,8 @@ object GridModel {
         rowBorder + "\n" + rowsWithBorder
       }
 
-      val rawValues = List.range(0, gridHeight).map(rowToString).mkString("\n")
-      wrapItUp(rawValues)
+      val rawRows = List.range(0, gridHeight).map(rowToString).mkString("\n")
+      wrapItUp(rawRows)
 
     }
   }

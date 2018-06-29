@@ -65,7 +65,7 @@ object GameModel {
     }
 
     def printBoard() = {
-      println("\n" + grid.toString)
+      println("\n" + grid.toString + "\n")
     }
 
     def createPositionsFromShip(ship: Ship): List[Position] = {
@@ -80,8 +80,8 @@ object GameModel {
       }
 
       val points = createPositionsFromShip(ship)
-      if(pointsAreInvalid(points)) Left((this, ResponseMessage.boatPlaceErr))
-      else Right(createPlayer(name, grid,  ships :+ ship), ResponseMessage.boatPlaced)
+      if(pointsAreInvalid(points)) Left((this, ResponseMessage.boatPlacingError))
+      else Right(createPlayer(name, grid,  ships :+ ship), ResponseMessage.boatPlacedCorrectly)
     }
 
     def getAttack(): Position = ???
@@ -91,13 +91,13 @@ object GameModel {
 
   case class Human(override val name: String, override val grid: Grid = Gridson.empty, override val ships: Seq[Ship] = Seq.empty[Ship]) extends Player {
 
-    def successfulAttack(p: Position, defender: Player) = (Human(name, grid.newStatus(p, Hit), ships) , defender, ResponseMessage.hit)
+    def successfulAttack(p: Position, defender: Player) = (Human(name, grid.newStatus(p, Hit), ships) , defender, ResponseMessage.hitAttack)
     def sunkAttack(positions: List[Position], defender: Player) = (Human(name, grid.addStatus(positions, Sunk), ships) , defender, ResponseMessage.sunk)
-    def missedAttack(p: Position, defender: Player) =  (Human(name, grid.newStatus(p, Miss), ships), defender, ResponseMessage.miss)
-    def alreadyHitAttack(defender: Player) = (Human(name, grid, ships), defender, ResponseMessage.already_hit)
+    def missedAttack(p: Position, defender: Player) =  (Human(name, grid.newStatus(p, Miss), ships), defender, ResponseMessage.missedAttack)
+    def alreadyHitAttack(defender: Player) = (Human(name, grid, ships), defender, ResponseMessage.alreadyHit)
     def createPlayer(name: String, grid: Grid = Gridson.empty, ships: Seq[Ship] = Seq.empty[Ship]) = Human(name,grid,ships)
 
-    def parseShipFromUserInput(): Try[Ship] = {
+    def shipFromUserInput(): Try[Ship] = {
       println("place ship: x y length vertical[true/false]")
       val line = readLine
       val t = line.split(" ")
@@ -106,15 +106,15 @@ object GameModel {
       )
     }
 
-    def placeShip(u: Player, numShips:Int, grid: Grid = Gridson.empty): Player = {
+    def placeShip(player: Player, numShips:Int, grid: Grid = Gridson.empty): Player = {
 
       def printErrorAndRetry(e: String): Player = {
         println(e)
-        placeShip(u, numShips)
+        placeShip(player, numShips)
       }
 
-      def addShipAndContinue(ship: Ship): Player = {
-        u.addShip(ship) match{
+      def addShipsWrapper(ship: Ship): Player = {
+        player.addShip(ship) match{
           case Left((user, resp)) =>
             println(resp)
             println(grid.toString)
@@ -127,18 +127,18 @@ object GameModel {
         }
       }
 
-      def getShipFromUser: Player = {
-        parseShipFromUserInput match {
+      def shipFromUserWrapper: Player = {
+        shipFromUserInput match {
           case Failure(e) => printErrorAndRetry("Error placing ship, try again")
-          case Success(s) => addShipAndContinue(s)
+          case Success(s) => addShipsWrapper(s)
         }
       }
 
-      if(numShips == 0) u
-      else getShipFromUser
+      if(numShips == 0) player
+      else shipFromUserWrapper
     }
 
-    def placeShips(): Player = {
+    def addShips(): Player = {
       println(s"placing ships for ${this.name}")
       placeShip(this, numberOfUserBoats)
     }
@@ -164,10 +164,10 @@ object GameModel {
   case class Bot(override val name: String, override val grid: Grid = Gridson.empty, override val ships: Seq[Ship] = Seq.empty[Ship]) extends Player  {
 
 
-    def successfulAttack(p: Position, defender: Player) = (Bot(name, grid.newStatus(p, Hit), ships) , defender, ResponseMessage.hit)
+    def successfulAttack(p: Position, defender: Player) = (Bot(name, grid.newStatus(p, Hit), ships) , defender, ResponseMessage.hitAttack)
     def sunkAttack(positions: List[Position], defender: Player) = (Bot(name, grid.addStatus(positions, Sunk), ships) , defender, ResponseMessage.sunk)
-    def missedAttack(p: Position, defender: Player) =  (Bot(name, grid.newStatus(p, Miss), ships), defender, ResponseMessage.miss)
-    def alreadyHitAttack(defender: Player) = (Bot(name, grid, ships), defender, ResponseMessage.already_hit)
+    def missedAttack(p: Position, defender: Player) =  (Bot(name, grid.newStatus(p, Miss), ships), defender, ResponseMessage.missedAttack)
+    def alreadyHitAttack(defender: Player) = (Bot(name, grid, ships), defender, ResponseMessage.alreadyHit)
     def createPlayer(name: String, grid: Grid = Gridson.empty, ships: Seq[Ship] = Seq.empty[Ship]) = Bot(name,grid,ships)
 
     override def getAttack(): Position = {
@@ -220,7 +220,7 @@ object GameModel {
         Ship(Position(x,y),length,orientation)
       }
 
-      def addShipAndContinue(ship: Ship): Player = {
+      def addShipWrapper(ship: Ship): Player = {
         player.addShip(ship) match{
           case Left((user, _)) =>
             placeShip(user, shipsToPlace, lengths, grid)
@@ -233,7 +233,7 @@ object GameModel {
       }
 
       def createShip(length: Int): Player = {
-        addShipAndContinue(createRandomShip(length))
+        addShipWrapper(createRandomShip(length))
       }
 
       if(shipsToPlace == 0) {
@@ -242,7 +242,7 @@ object GameModel {
       else createShip(lengths.head)
     }
 
-    def placeShips(): Player = {
+    def addShips(): Player = {
       println(s"Place ships for player -  ${this.name}")
       placeShip(this, shipSizesForAI.size, shipSizesForAI)
     }

@@ -2,22 +2,22 @@ package Game
 import Game.GridModel.{Grid, Undiscovered}
 import Game.ShipOrientation.ShipOrientation
 
-object ResponseMessage extends Enumeration{
-  val already_hit = "oops, you already tried to hit it here"
-  val sunk = "boom, ship is down!!"
-  val hit = "kshksh ... hit!"
-  val error = "ooops, it's a wrong input"
-  val miss = "sorry, miss!"
-  val boatPlaceErr = "thats a wrong place for this ship"
-  val boatPlaced = "the ship is ready"
-}
-
 object Constants {
   val gridWidth = 10
   val gridHeight = 10
   val rowBorder = "S 0 1 2 3 4 5 6 7 8 9"
   val shipSizesForAI = Seq(2,3,4)
   val numberOfUserBoats = 1
+}
+
+object ResponseMessage extends Enumeration{
+  val boatPlacingError = "thats a wrong place for this ship"
+  val boatPlacedCorrectly = "the ship is ready"
+  val alreadyHit = "oops, you already tried to hit it here"
+  val sunk = "boom, ship is down!!"
+  val hitAttack = "kshksh ... hit!"
+  val error = "ooops, it's a wrong input"
+  val missedAttack = "sorry, miss!"
 }
 
 object Gridson{
